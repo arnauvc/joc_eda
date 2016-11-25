@@ -46,7 +46,7 @@ endif
 
 CXXFLAGS = -std=c++11 -Wall -Wno-unused-variable $(ARCHFLAGS) $(PROFILEFLAGS) $(DEBUGFLAGS) -O$(strip $(OPTIMIZE))
 
-LDFLAGS  = -std=c++11 -lm $(ARCHFLAGS) $(PROFILEFLAGS) $(DEBUGFLAGS) -O$(strip $(OPTIMIZE)) -lrt
+LDFLAGS  = -std=c++11 -lm $(ARCHFLAGS) $(PROFILEFLAGS) $(DEBUGFLAGS) -O$(strip $(OPTIMIZE))
 
 # Rules
 
@@ -61,10 +61,10 @@ Game: Structs.o Settings.o State.o Info.o Random.o Board.o Action.o Player.o Reg
 	$(CXX) $^ -o $@ $(LDFLAGS)
 
 SecGame: Structs.o Settings.o State.o Info.o Random.o Board.o Action.o Player.o Registry.o SecGame.o SecMain.o Utils.o 
-	$(CXX) $^ -o $@ $(LDFLAGS)
+	$(CXX) $^ -o $@ $(LDFLAGS) -lrt
 
 %.exe: %.o Structs.o Settings.o State.o Info.o Random.o Board.o Action.o Player.o Registry.o SecGame.o SecMain.o Utils.o
-	$(CXX) $^ -o $@ $(LDFLAGS)
+	$(CXX) $^ -o $@ $(LDFLAGS) -lrt
 
 Makefile.deps: *.cc
 	$(CXX) $(CXXFLAGS) -MM *.cc > Makefile.deps

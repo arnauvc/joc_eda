@@ -3,6 +3,8 @@ AIDemo.o: AIDemo.cc Player.hh Info.hh Settings.hh Structs.hh Utils.hh \
  State.hh Action.hh Random.hh Registry.hh
 AINull.o: AINull.cc Player.hh Info.hh Settings.hh Structs.hh Utils.hh \
  State.hh Action.hh Random.hh Registry.hh
+AIRabbit.o: AIRabbit.cc Player.hh Info.hh Settings.hh Structs.hh Utils.hh \
+ State.hh Action.hh Random.hh Registry.hh
 Board.o: Board.cc Board.hh Info.hh Settings.hh Structs.hh Utils.hh \
  State.hh Action.hh Random.hh
 Game.o: Game.cc Game.hh Player.hh Info.hh Settings.hh Structs.hh Utils.hh \
