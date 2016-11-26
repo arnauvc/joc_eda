@@ -1,6 +1,7 @@
 #include "Player.hh"
 #include <list>
 #include <map>
+#include <math.h>
 
 /**
  * Write the name of your player and save this file
@@ -34,74 +35,111 @@ struct PLAYER_NAME : public Player {
 		if( cela.haunted  or cela.id != -1 or cela.type == Wall) return false;
 		return true;
 	}
+	Dir calcular_seg_dir(int d){
+		int enu = (d+2)%8  ;
+		if ( enu == 0 )return Bottom;
+		else if (enu == 2)return Right;
+		else if (enu == 4)return Top;
+		else if (enu == 6) return Left;
+		else return None;
+	}
 
-	list<Dir> bfs(int id){
-		Unit farmer = unit(id);	
+	int distMan(Pos a, Pos b){
+		return sqrt(pow((a.i - b.i),2) + pow((a.j - b.j),2));
+	}
+
+	list<Dir> bfs(int id){ 
+		Unit farmer = unit(id);
+		bool primer  = true;
 		//Structures
 		queue<Pos_Dir> Q;
 		list<Dir> L;
 		map<Pos, bool> visitats;
+		Pos_Dir pd;
+		int ran = 2*random(0,3);
+		cout << "Valor inicial de busqueda:  " <<calcular_seg_dir( ran)<< endl;
 
-		for(int i = 0 ; i < 1; ++i ){
-			Pos_Dir pd;
-			pd.pos  = farmer.pos;
-			pd.dir = None;
-			auto it = visitats.find(pd.pos);
-			if ((cell(pd.pos)).type != Wall  ){
-				bool entrat = false;
-				if(it == visitats.end() ){
- 					visitats[pd.pos] = false;
- 					entrat = true;
- 				}
-				if( (*it).second == false or entrat){
-					
-					Q.push(pd);
-					(*it).second = true;
-					while(not Q.empty()){
-						Pos_Dir pdNew;
-						pdNew = Q.front(); 
-						Q.pop();
-						//////Evaluar si la cella es bona per mouresi
-						if(pdNew.pos != pd.pos){
-							
-							Cell cela = cell(pdNew.pos);
-							if( not cela.haunted and cela.id != -1){
-								
-								L.push_back(pdNew.dir);	
-							}
-							if(cela.owner != 0 and not cela.haunted and cela.id == -1){
-								
-								return L;	
-							}
-						}
-						
-						for(int k = 0; k < 4; ++k){
-							
-							Pos_Dir pdSeguent;
-							if(k == 0) {pdSeguent.pos = pdNew.pos+ Right; pdSeguent.dir = Right; }
-							else if (k == 1){pdSeguent.pos = pdNew.pos + Bottom; pdSeguent.dir = Bottom;}
-							else if (k == 2){pdSeguent.pos = pdNew.pos + Left; pdSeguent.dir = Left;}
-							else {pdSeguent.pos = pdNew.pos + Top; pdSeguent.dir = Top;}
-							auto it2 = visitats.find(pdSeguent.pos);
-							
-							if(  (cell(pdSeguent.pos).type != 1) ) {
-								
-								bool entrat2 = false;
-								if(it2 == visitats.end() ){ 
-									visitats[pdSeguent.pos] = false;
-									entrat2 = true;
+		pd.pos  = farmer.pos;
+		pd.dir = Left;
+		cout << "Valor de PD:  " <<pd.pos <<"   " <<pd.dir<< endl;
+		auto it = visitats.find(pd.pos);
+		if(it == visitats.end() ){
+ 			visitats[pd.pos] = false;
+ 		}
+ 		it = visitats.find(pd.pos);
+ 		if( (*it).second == false ){
+ 			if ((cell(pd.pos)).type != Wall  ){
+ 				Q.push(pd);
+ 				(*it).second = true;
+ 				while(not Q.empty()){
+ 					Pos_Dir pdNew;
+					pdNew = Q.front(); 
+					Q.pop();
+
+					if(pdNew.pos != pd.pos and not primer){
+						cout << "Dins" << endl;
+						cout << "Actualitzacio valor " << pdNew.pos << "    " << pdNew.dir<<endl;
+						Cell cela = cell(pdNew.pos);
+						cout << "Comprovacio   valor cela:    "  << cela.haunted << " Cela id:   " <<  cela.id<<endl;
+						if( not cela.haunted and cela.id == -1){
+							cout << "Valor de pdNew.dir:  " << pdNew.dir << endl;
+							L.push_back(pdNew.dir);
+							if(cela.owner != 0 ){
+								if( distMan(pdNew.pos, pd.pos ) == 1){
+									list<Dir> M;
+									M.push_back(pdNew.dir);
+									list<Dir>::iterator itM = M.begin();
+									
+									command(id, *itM); 
+									return M;
 								}
-								if((*it2).second == false or entrat2){
-									Q.push(pdSeguent);
-									(*it2).second = true;
-								
+								list<Dir>::iterator itL;
+								for(itL = L.begin(); itL != L.end(); ++itL){
+									cout << "Direccions llista:  " << *itL << endl;
 								}
+								itL = L.begin();
+								command(id, *itL); 
+								if(round() < 3) cout<< "Command realitzat:  " << *itL << endl;
+								cout << endl;
+								return L;
 							}
 						}
 					}
-				}	
-			}
-		}
+					primer = false;
+					for(int k = 0; k < 4; ++k){
+						Pos_Dir pdSeguent;
+						if(k == 0) {
+							pdSeguent.pos = pdNew.pos+ calcular_seg_dir( ran);
+							pdSeguent.dir = calcular_seg_dir(ran ); 
+						}
+						else if (k == 1){
+							pdSeguent.pos = pdNew.pos + calcular_seg_dir(ran +2); 
+							pdSeguent.dir = calcular_seg_dir(ran +2);
+						}
+						else if (k == 2){
+							pdSeguent.pos = pdNew.pos + calcular_seg_dir(ran +4 ); 
+							pdSeguent.dir = calcular_seg_dir(ran +4 );
+						}
+						else {
+							pdSeguent.pos = pdNew.pos + calcular_seg_dir(ran +6); 
+							pdSeguent.dir = calcular_seg_dir(ran +6 );
+						}
+						cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<< endl;
+						auto it2 = visitats.find(pdSeguent.pos);
+						if(it2 == visitats.end() ){ 
+							visitats[pdSeguent.pos] = false;
+						}
+						it2 = visitats.find(pdSeguent.pos);
+						if((*it2).second == false){
+							if(  (cell(pdSeguent.pos).type != Wall) ) {
+								Q.push(pdSeguent);
+								(*it2).second = true;
+							}
+						}
+					}
+ 				}
+ 			}
+ 		}
 	cerr << None << endl;
 	return L;
 	}
@@ -113,24 +151,34 @@ struct PLAYER_NAME : public Player {
 		VE k = knights(0);
 		VE w = witches(0);
 		//int id = 14;
+		if(round()<100){
+
 		for (unsigned int i = 0 ; i < f.size(); ++i) {
-			if((round() < 4 ) or (round() > 25 and round() < 31) or (round() > 63 and round() < 68) or (round() >127 and round() < 133)){
+			/*
 				cerr << round() << endl; //////////////// round
 				Dir d = Dir(2*random(0, 3));
 				while(not (pos_valida(unit(f[i]).pos +  d))  ) {
 					d = Dir(2*random(0, 3));
 				}
 				command(f[i], d );
-			}
-			else{
-			
-			
+			*/
+			//int i = 8;
+			if(round() < 3) cout << "Ronda num: " << round()<< endl;
 			list<Dir> L= bfs(f[i]);
 			list<Dir>::iterator it = L.begin();
-			command(f[i], *it); 
+			
+			/*
+			cout << "Estat llista: " << endl;
+			for(list<Dir>::iterator itL = L.begin(); itL != L.end(); ++itL){
+				cout << "Direccions llista:  " << *itL << endl;
+				cout << endl;
 			}
+			*/
+			
+
+		
 		}
-		for (unsigned int j= 0 ; j < k.size(); ++j) {
+		/*for (unsigned int j= 0 ; j < k.size(); ++j) {
 			
 			list<Dir> L= bfs(k[j]);
 			list<Dir>::iterator it = L.begin();
@@ -139,6 +187,9 @@ struct PLAYER_NAME : public Player {
 		}
 		for (int i : f) {}
 
+		*/
+
+		}
   	}
 
 };
