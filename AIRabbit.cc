@@ -37,24 +37,12 @@ struct PLAYER_NAME : public Player {
 	}
 	Dir calcular_seg_dir(int d){
 		int enu = (d+2)%8  ;
-		if ( enu == 0 )return Bottom;
-		else if (enu == 2)return Right;
-		else if (enu == 4)return Top;
-		else if (enu == 6) return Left;
-		else return None;
+		return Dir(enu);
 	}
 
 	Dir calcular_seg_dir_modul8(int d){
 		int enu = (d+1)%8  ;
-		if ( enu == 0 )return Bottom;
-		else if (enu == 1)return BR;
-		else if (enu == 2)return Right;
-		else if (enu == 3) return RT;
-		else if (enu == 4)return Top;
-		else if (enu == 5)return TL;
-		else if (enu == 6) return Left;
-		else if (enu == 7) return LB;
-		else return None;
+		return Dir(enu);
 	}
 
 	int distMan(Pos a, Pos b){
@@ -115,22 +103,9 @@ struct PLAYER_NAME : public Player {
 						primer = false;
 						for(int k = 0; k < 4; ++k){
 							Pos_Dir pdSeguent;
-							if(k == 0) {
-								pdSeguent.pos = pdNew.pos+ calcular_seg_dir( ran);
-								pdSeguent.dir = calcular_seg_dir(ran ); 
-							}
-							else if (k == 1){
-								pdSeguent.pos = pdNew.pos + calcular_seg_dir(ran +2); 
-								pdSeguent.dir = calcular_seg_dir(ran +2);
-							}
-							else if (k == 2){
-								pdSeguent.pos = pdNew.pos + calcular_seg_dir(ran +4 ); 
-								pdSeguent.dir = calcular_seg_dir(ran +4 );
-							}
-							else {
-								pdSeguent.pos = pdNew.pos + calcular_seg_dir(ran +6); 
-								pdSeguent.dir = calcular_seg_dir(ran +6 );
-							}
+							pdSeguent.pos = pdNew.pos+ calcular_seg_dir( ran + 2*k);
+							pdSeguent.dir = calcular_seg_dir(ran + 2*k ); 
+							
 							cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<< endl;
 							auto it2 = visitats.find(pdSeguent.pos);
 							if(it2 == visitats.end() ){ 
@@ -155,59 +130,30 @@ struct PLAYER_NAME : public Player {
 							if( not cela.haunted ){
 								cout << "Valor de pdNew.dir:  " << pdNew.dir << endl;
 								L.push_back(pdNew.dir);
-								Unit u = unit(cela.id);
-
-								if(u.type != 2 and u.player != 0   ){
-									if( distMan(pdNew.pos, pd.pos ) <= 1){
-										cout<< "Command Return Direccio Caballer:  " << pdNew.dir << endl;
-										return pdNew.dir;
+								if(cela.id != -1){								
+									Unit u = unit(cela.id);
+									if(u.type != 2 and u.player != 0   ){
+										if( distMan(pdNew.pos, pd.pos ) <= 1){
+											cout<< "Command Return Direccio Caballer:  " << pdNew.dir << endl;
+											return pdNew.dir;
+										}
+										list<Dir>::iterator itL;
+										for(itL = L.begin(); itL != L.end(); ++itL){
+											cout << "Direccions llista:  " << *itL << endl;
+										}
+										cout<< "Command Direccio Caballer:  " << *(itL) << endl;
+										cout << endl;
+										itL = L.begin();
+										return *itL;
 									}
-									list<Dir>::iterator itL;
-									for(itL = L.begin(); itL != L.end(); ++itL){
-										cout << "Direccions llista:  " << *itL << endl;
-									}
-									cout<< "Command Direccio Caballer:  " << *itL << endl;
-									cout << endl;
-									itL = L.begin();
-									return *itL;
 								}
 							}	
 						}
 						primer = false;
 						for(int k = 0; k < 8; ++k){
 							Pos_Dir pdSeguent;
-							if(k == 0) {
-								pdSeguent.pos = pdNew.pos+ calcular_seg_dir_modul8( ranK);
-								pdSeguent.dir = calcular_seg_dir_modul8(ranK ); 
-							}
-							else if (k == 1){
-								pdSeguent.pos = pdNew.pos + calcular_seg_dir_modul8(ranK +1); 
-								pdSeguent.dir = calcular_seg_dir_modul8(ranK +1);
-							}
-							else if (k == 2){
-								pdSeguent.pos = pdNew.pos + calcular_seg_dir_modul8(ranK +2 ); 
-								pdSeguent.dir = calcular_seg_dir_modul8(ranK +2 );
-							}
-							else if (k == 3){
-								pdSeguent.pos = pdNew.pos + calcular_seg_dir_modul8(ranK +3); 
-								pdSeguent.dir = calcular_seg_dir_modul8(ranK +3);
-							}
-							else if (k == 4){
-								pdSeguent.pos = pdNew.pos + calcular_seg_dir_modul8(ranK +4 ); 
-								pdSeguent.dir = calcular_seg_dir_modul8(ranK +4 );
-							}
-							else if (k == 5){
-								pdSeguent.pos = pdNew.pos + calcular_seg_dir_modul8(ranK +5); 
-								pdSeguent.dir = calcular_seg_dir_modul8(ranK +5);
-							}
-							else if (k == 6){
-								pdSeguent.pos = pdNew.pos + calcular_seg_dir_modul8(ranK +6); 
-								pdSeguent.dir = calcular_seg_dir_modul8(ranK +6 );
-							}
-							else {
-								pdSeguent.pos = pdNew.pos + calcular_seg_dir_modul8(ranK +7 ); 
-								pdSeguent.dir = calcular_seg_dir_modul8(ranK +7);
-							}
+							pdSeguent.pos = pdNew.pos+ calcular_seg_dir_modul8( ranK + k);
+							pdSeguent.dir = calcular_seg_dir_modul8(ranK + k); 
 							
 							cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<< endl;
 							auto it3 = visitats.find(pdSeguent.pos);
@@ -236,25 +182,50 @@ struct PLAYER_NAME : public Player {
 		VE f = farmers(0);
 		VE k = knights(0);
 		VE w = witches(0);
-		//int id = 14;
+		//int id = 14; 
 		
-		/*
+		
 		for (unsigned int i = 0 ; i < f.size(); ++i) {
 			if(round() < 3) cout << "Ronda num: " << round()<< endl;
 			command(f[i] ,bfs(f[i])); 
 		}
-		*/
-		if( round() < 200 ){
+		
+		
+		if( round() < 200){
 			cout << "Ronda num: " << round()<< endl;
+			
 			for (unsigned int j= 0 ; j < k.size(); ++j) {
+				cout << "ID Cavaller: " << k[j] << endl;
 				command(k[j], bfs(k[j]));
 			}
-		}
-		/*
-		for (int i : f) {
 
 		}
-		*/
+		if (round() < 40) command(w[0], Right);
+		    else if (round() < 80) command(w[0], Left);
+		    else if (round() < 120) command(w[0], None);
+		    else if (round() < 160) command(w[0], Bottom);
+		    else {
+		      set<Pos> s;
+		      while ((int)s.size() < 4) s.insert(Pos(random(0, 36), random(0, 36)));
+		      vector<Pos> v(s.begin(), s.end());
+		      if (v[random(0, 3)].i < 18) command(w[0], None);
+		      else command(w[0], Top);
+		    }
+		if (round() < 40) command(w[1], Bottom);
+		    else if (round() < 80) command(w[1], Left);
+		    else if (round() < 120) command(w[1], None);
+		    else if (round() < 160) command(w[1], Bottom);
+		    else {
+		      set<Pos> s;
+		      while ((int)s.size() < 4) s.insert(Pos(random(0, 36), random(0, 36)));
+		      vector<Pos> v(s.begin(), s.end());
+		      if (v[random(0, 3)].i < 18) command(w[1], None);
+		      else command(w[1], Top);
+    }
+
+
+		
+
   	}
 };
 
