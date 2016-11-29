@@ -27,6 +27,7 @@ struct PLAYER_NAME : public Player {
 	typedef vector< vector<int>> MAT;
 	struct Pos_Dir {
 		Pos pos;
+		Dir ini;
 		Dir dir; // Direccio de la qual prove. Si es Node 1 -> Node 2 , el Node2 te dir Dreta
 	};
 
@@ -55,6 +56,7 @@ struct PLAYER_NAME : public Player {
 		queue<Pos_Dir> Q;
 		list<Dir> L;
 		map<Pos, bool> visitats;
+		bool pos_basica = true;
 		Pos_Dir pd;
 		int ran = 2*random(0,3);
 		int ranK = random(0,7); // %8
@@ -77,15 +79,20 @@ struct PLAYER_NAME : public Player {
 					Q.pop();
 
 					if(unitat.type == Farmer){
+						
 						if(pdNew.pos != pd.pos and not primer){
 							cout << "Dins" << endl;
 							cout << "Actualitzacio valor " << pdNew.pos << "    " << pdNew.dir<<endl;
 							Cell cela = cell(pdNew.pos);
 							cout << "Comprovacio   valor cela:    "  << cela.haunted << " Cela id:   " <<  cela.id<<endl;
-							if( not cela.haunted and cela.id == -1){
+							cout << "Valor de pos_basica: " << pos_basica << endl;
+						
 								cout << "Valor de pdNew.dir:  " << pdNew.dir << endl;
 								L.push_back(pdNew.dir);
 								if(cela.owner != 0 ){
+									cout << "Valor de pdNew.pos:  " << pdNew.pos << "   dir:   " << pdNew.dir<< "  Ini:  " << pdNew.ini << endl;
+									cout << endl;
+									/*
 									if( distMan(pdNew.pos, pd.pos ) == 1){
 										return pdNew.dir;
 									}
@@ -93,32 +100,39 @@ struct PLAYER_NAME : public Player {
 									for(itL = L.begin(); itL != L.end(); ++itL){
 										cout << "Direccions llista:  " << *itL << endl;
 									}
-									if(round() < 3) cout<< "Command realitzat:  " << *itL << endl;
+									cout<< "Command realitzat:  " << *itL << endl;
 									cout << endl;
 									itL = L.begin();
 									return *itL;
+									*/
+									return pdNew.ini;
 								}
-							}	
+							
 						}
 						primer = false;
-						for(int k = 0; k < 4; ++k){
+						for( int k = 0; k < 4; ++k){
 							Pos_Dir pdSeguent;
 							pdSeguent.pos = pdNew.pos+ calcular_seg_dir( ran + 2*k);
 							pdSeguent.dir = calcular_seg_dir(ran + 2*k ); 
+							cout << "Valor del pdNew.dir per Ini:     " << pdNew.dir << endl;
+							if(pos_basica) {pdSeguent.ini = pdSeguent.dir;}
+							else {pdSeguent.ini = pdNew.dir;}
 							
-							cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<< endl;
+							
+							cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
 							auto it2 = visitats.find(pdSeguent.pos);
 							if(it2 == visitats.end() ){ 
 								visitats[pdSeguent.pos] = false;
 							}
 							it2 = visitats.find(pdSeguent.pos);
 							if((*it2).second == false){
-								if(  (cell(pdSeguent.pos).type != Wall) ) {
+								if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and (  cell(pdSeguent.pos).id == -1) ) {
 									Q.push(pdSeguent);
 									(*it2).second = true;
 								}
 							}
 						}
+						pos_basica = false;
 					}
 					else if (unitat.type == Knight){
 						cout << "Es un caballeeer" << endl;
@@ -127,13 +141,13 @@ struct PLAYER_NAME : public Player {
 							cout << "Actualitzacio valor " << pdNew.pos << "    " << pdNew.dir<<endl;
 							Cell cela = cell(pdNew.pos);
 							cout << "Comprovacio   valor cela:    "  << cela.haunted << " Cela id:   " <<  cela.id<<endl;
-							if( not cela.haunted ){
+							
 								cout << "Valor de pdNew.dir:  " << pdNew.dir << endl;
 								L.push_back(pdNew.dir);
 								if(cela.id != -1){								
 									Unit u = unit(cela.id);
 									if(u.type != 2 and u.player != 0   ){
-										if( distMan(pdNew.pos, pd.pos ) <= 1){
+										if(distMan(pdNew.pos, pd.pos ) < 2){
 											cout<< "Command Return Direccio Caballer:  " << pdNew.dir << endl;
 											return pdNew.dir;
 										}
@@ -147,7 +161,7 @@ struct PLAYER_NAME : public Player {
 										return *itL;
 									}
 								}
-							}	
+								
 						}
 						primer = false;
 						for(int k = 0; k < 8; ++k){
@@ -162,18 +176,19 @@ struct PLAYER_NAME : public Player {
 							}
 							it3 = visitats.find(pdSeguent.pos);
 							if((*it3).second == false){
-								if(  (cell(pdSeguent.pos).type != Wall) ) {
+								if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) ) {
 									Q.push(pdSeguent);
 									(*it3).second = true;
 								}
 							}
 						}
+						
 					}
  				}
  			}
  		}
-	cout <<"What da hell is happening" << endl;
-	return Right;
+		cout <<"What da hell is happening" << endl;
+		return Right;
 	}
   /**
    * Play method, invoked once per each round.
@@ -185,8 +200,8 @@ struct PLAYER_NAME : public Player {
 		//int id = 14; 
 		
 		
-		for (unsigned int i = 0 ; i < f.size(); ++i) {
-			if(round() < 3) cout << "Ronda num: " << round()<< endl;
+		for (unsigned int i = 0 ; i <  f.size(); ++i) {
+			 cout << "Ronda num: " << round()<< endl;
 			command(f[i] ,bfs(f[i])); 
 		}
 		
@@ -200,9 +215,12 @@ struct PLAYER_NAME : public Player {
 			}
 
 		}
+		
+
+		
 		if (round() < 40) command(w[0], Right);
-		    else if (round() < 80) command(w[0], Left);
-		    else if (round() < 120) command(w[0], None);
+		    else if (round() < 80) command(w[0], Bottom);
+		    else if (round() < 120) command(w[0], Top);
 		    else if (round() < 160) command(w[0], Bottom);
 		    else {
 		      set<Pos> s;
@@ -212,17 +230,18 @@ struct PLAYER_NAME : public Player {
 		      else command(w[0], Top);
 		    }
 		if (round() < 40) command(w[1], Bottom);
-		    else if (round() < 80) command(w[1], Left);
-		    else if (round() < 120) command(w[1], None);
-		    else if (round() < 160) command(w[1], Bottom);
+		    else if (round() < 80) command(w[1], Right);
+		    else if (round() < 120) command(w[1], Left);
+		    else if (round() < 160) command(w[1], Right);
 		    else {
 		      set<Pos> s;
 		      while ((int)s.size() < 4) s.insert(Pos(random(0, 36), random(0, 36)));
 		      vector<Pos> v(s.begin(), s.end());
 		      if (v[random(0, 3)].i < 18) command(w[1], None);
 		      else command(w[1], Top);
-    }
 
+    		}
+    		
 
 		
 
