@@ -7,7 +7,7 @@
  * Write the name of your player and save this file
  * with the same name and .cc extension.
  */
-#define PLAYER_NAME Rabbit
+#define PLAYER_NAME Hamster
 
 
 struct PLAYER_NAME : public Player {
@@ -209,8 +209,8 @@ struct PLAYER_NAME : public Player {
 							it3 = visitats.find(pdSeguent.pos);
 							if((*it3).second == false){
 									bool capdins = false;
-									if((cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) or  ((not cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) and cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)) capdins = true;
-						                               if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted )and capdins/*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
+									
+						                               if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted )/*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
 						                                   	// cout << "Ha carregat la cela" << pdSeguent.pos  << "Amb direccio: " << pdSeguent.dir << endl;
 						                                    	Q.push(pdSeguent);
 									(*it3).second = true;
@@ -224,7 +224,7 @@ struct PLAYER_NAME : public Player {
 							Cell cela = cell(pdNew.pos);
 							if(cela.id != -1){
 								Unit u = unit(cela.id);
-	                                					if( u.player != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
+	                                					if( u.type != 2 and  u.player != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
 	                                     						proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
 	                                    						return pdNew.ini;
 									}
@@ -252,7 +252,7 @@ struct PLAYER_NAME : public Player {
 							}
 							it3 = visitats.find(pdSeguent.pos);
 							if((*it3).second == false){
-						                                if(  (cell(pdSeguent.pos).type != Wall and proper_moviment[pdNew.posP.i][pdNew.posP.j])  /*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
+						                                if(  (cell(pdSeguent.pos).type != Wall )  /*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
 						                                   	// cout << "Ha carregat la cela" << pdSeguent.pos  << "Amb direccio: " << pdSeguent.dir << endl;
 						                                    	Q.push(pdSeguent);
 										(*it3).second = true;
