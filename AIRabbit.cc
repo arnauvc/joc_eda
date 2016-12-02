@@ -27,15 +27,19 @@ struct PLAYER_NAME : public Player {
 	typedef vector< vector<int>> MAT;
 	struct Pos_Dir {
 		Pos pos;
+        		Pos posP;
 		Dir ini;
 		Dir dir; // Direccio de la qual prove. Si es Node 1 -> Node 2 , el Node2 te dir Dreta
 		bool inicial;
 	};
 
-	bool pos_valida(int i, int j){
-		if(i> 0 and i< 38 and j>0 and j<38)return true;
-		return false;
-	}
+	struct BT{
+	    	bool b = true;
+	    	UnitType ut;
+	    };
+
+     	vector<Dir> vdir{Top,RT,Right, BR,Bottom,LB,Left, TL};
+
 	Dir calcular_seg_dir(int d){
 		int enu = (d+2)%8  ;
 		return Dir(enu);
@@ -46,11 +50,7 @@ struct PLAYER_NAME : public Player {
 		return Dir(enu);
 	}
 
-	int distMan(Pos a, Pos b){
-		return sqrt(pow((a.i - b.i),2) + pow((a.j - b.j),2));
-	}
-
-	Dir bfs(int id, vector< vector<int> > & cell_segura){ 
+    Dir bfs(int id, vector< vector<BT> > & cell_segura, vector<vector<bool> >& proper_moviment){
 		Unit unitat = unit(id);
 		bool primer = true;
 		queue<Pos_Dir> Q;
@@ -59,10 +59,8 @@ struct PLAYER_NAME : public Player {
 		Pos_Dir pd;
 		int ran = 2*random(0,3);
 		int ranK = random(0,7); // %8
-		cout << "Valor inicial de busqueda:  " <<calcular_seg_dir_modul8( ranK)<< endl;
 		pd.pos  = unitat.pos;
 		pd.dir = Left;
-		cout << "Valor de PD:  " <<pd.pos <<"   " <<pd.dir<< endl;
 		auto it = visitats.find(pd.pos);
 		if(it == visitats.end() ){
  			visitats[pd.pos] = false;
@@ -79,81 +77,127 @@ struct PLAYER_NAME : public Player {
 					if(unitat.type == Farmer){
 						
 						if(pdNew.pos != pd.pos and not primer){
-							cout << "Dins" << endl;
-							cout << "Actualitzacio valor. Pos:  " << pdNew.pos << "  Dir:  " << pdNew.dir << " Ini: "<<  pdNew.ini<<endl;
+							//cout << "Dins" << endl;
+							//cout << "Actualitzacio valor. Pos:  " << pdNew.pos << "  Dir:  " << pdNew.dir << " Ini: "<<  pdNew.ini<<endl;
 							Cell cela = cell(pdNew.pos);
-							cout << "Comprovacio   valor cela:    "  << cela.haunted << " Cela id:   " <<  cela.id<<endl;
-							cout << "Valor de pdNew.dir:  " << pdNew.dir << endl;
-							if(cela.owner != 0 ){
-								cout << "Valor de pdNew.pos:  " << pdNew.pos << "   dir:   " << pdNew.dir<< "  Ini:  " << pdNew.ini << endl;
-								cout << endl;
-								return pdNew.ini;
-							}
-							
+							//cout << "Comprovacio   valor cela:    "  << cela.haunted << " Cela id:   " <<  cela.id<<endl;
+							//cout << "Valor de pdNew.dir:  " << pdNew.dir << endl;
+	                           					 if(cela.owner != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
+	                               		 					//cout << "Comanda a executa. Pos:  " << pdNew.pos << "   dir:   " << pdNew.dir<< "  Ini:  " << pdNew.ini << endl;
+									cout << endl;
+	                                 						proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
+									return pdNew.ini;
+								}
 						}
-						
 						for( int k = 0; k < 4; ++k){
 							Pos_Dir pdSeguent;
 							pdSeguent.pos = pdNew.pos+ calcular_seg_dir( ran + 2*k);
 							pdSeguent.dir = calcular_seg_dir(ran + 2*k ); 
-							cout << "Valor del pdNew.dir per Ini:     " << pdNew.dir << endl;
+							//cout << "Valor del pdNew.dir per Ini:     " << pdNew.dir << endl;
 							if(primer)pdSeguent.inicial = true;
 							else pdSeguent.inicial = false;
-							if(pdSeguent.inicial) {pdSeguent.ini = pdSeguent.dir;}
-							else {pdSeguent.ini = pdNew.ini;}
+						                            if(pdSeguent.inicial) {
+						                                pdSeguent.ini = pdSeguent.dir;
+						                                pdSeguent.posP = pdSeguent.pos;
+						                            }
+						                            else {
+						                                pdSeguent.ini = pdNew.ini;
+						                                pdSeguent.posP = pdNew.posP;
+						                            }
 							
-							
-							cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
+							//cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
 							auto it2 = visitats.find(pdSeguent.pos);
 							if(it2 == visitats.end() ){ 
 								visitats[pdSeguent.pos] = false;
 							}
 							it2 = visitats.find(pdSeguent.pos);
 							if((*it2).second == false){
-								if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and (  cell(pdSeguent.pos).id == -1)  ) {
+                               						 if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and (  cell(pdSeguent.pos).id == -1)  and cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) {
 									Q.push(pdSeguent);
 									(*it2).second = true;
 								}
 							}
 						}
 						primer = false;
-						
 					}
 					else if (unitat.type == Knight){
-						
 						if(pdNew.pos != pd.pos and not primer){
-							cout << "Dins" << endl;
-							cout << "Actualitzacio valor. Pos:  " << pdNew.pos << "  Dir:  " << pdNew.dir << " Ini: "<<  pdNew.ini<<endl;
 							Cell cela = cell(pdNew.pos);
-							cout << "Comprovacio   valor cela:    "  << cela.haunted << " Cela id:   " <<  cela.id<<endl;
-							cout << "Valor de pdNew.dir:  " << pdNew.dir << endl;
-
 							if(cela.id != -1){
 								Unit u = unit(cela.id);
-								if(u.type != 2 and u.player != 0   ){
-									cout << "Valor de pdNew.pos:  " << pdNew.pos << "   dir:   " << pdNew.dir<< "  Ini:  " << pdNew.ini << endl;
-									return pdNew.ini;
-								}
+	                                						if(u.type != 2 and u.player != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
+	                                     						proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
+	                                    						return pdNew.ini;
+									}
 							}
 						}
 						for( int k = 0; k < 8; ++k){
 							Pos_Dir pdSeguent;
 							pdSeguent.pos = pdNew.pos+ calcular_seg_dir_modul8( ranK + k);
 							pdSeguent.dir = calcular_seg_dir_modul8(ranK + k); 
-							cout << "Valor del pdNew.dir per Ini:     " << pdNew.dir << endl;
+							//cout << "Valor del pdNew.dir per Ini:     " << pdNew.dir << endl;
 							if(primer)pdSeguent.inicial = true;
 							else pdSeguent.inicial = false;
-							if(pdSeguent.inicial) {pdSeguent.ini = pdSeguent.dir;}
-							else {pdSeguent.ini = pdNew.ini;}
-							cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
+						                	if(pdSeguent.inicial) {
+							                                pdSeguent.ini = pdSeguent.dir;
+							                                pdSeguent.posP = pdSeguent.pos;
+						                           	}
+						                            	else {
+							                                pdSeguent.ini = pdNew.ini;
+							                                pdSeguent.posP = pdNew.posP;
+						                          	}
+							//cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
 							auto it3 = visitats.find(pdSeguent.pos);
 							if(it3 == visitats.end() ){ 
 								visitats[pdSeguent.pos] = false;
 							}
 							it3 = visitats.find(pdSeguent.pos);
 							if((*it3).second == false){
-								if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted )) {
-									Q.push(pdSeguent);
+						                                if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) /*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
+						                                   	// cout << "Ha carregat la cela" << pdSeguent.pos  << "Amb direccio: " << pdSeguent.dir << endl;
+						                                    	Q.push(pdSeguent);
+									(*it3).second = true;
+								}
+							}
+						}
+						primer = false;
+					}
+					else if (unitat.type == Witch){
+						if(pdNew.pos != pd.pos and not primer){
+							Cell cela = cell(pdNew.pos);
+							if(cela.id != -1){
+								Unit u = unit(cela.id);
+	                                						if(u.type != 2 and u.player != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
+	                                     						proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
+	                                    						return pdNew.ini;
+									}
+							}
+						}
+						for( int k = 0; k < 4; ++k){
+							Pos_Dir pdSeguent;
+							pdSeguent.pos = pdNew.pos+ calcular_seg_dir( ran + 2*k);
+							pdSeguent.dir = calcular_seg_dir(ran + 2*k ); 
+							//cout << "Valor del pdNew.dir per Ini:     " << pdNew.dir << endl;
+							if(primer)pdSeguent.inicial = true;
+							else pdSeguent.inicial = false;
+						                	if(pdSeguent.inicial) {
+							                                pdSeguent.ini = pdSeguent.dir;
+							                                pdSeguent.posP = pdSeguent.pos;
+						                           	}
+						                            	else {
+							                                pdSeguent.ini = pdNew.ini;
+							                                pdSeguent.posP = pdNew.posP;
+						                          	}
+							//cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
+							auto it3 = visitats.find(pdSeguent.pos);
+							if(it3 == visitats.end() ){ 
+								visitats[pdSeguent.pos] = false;
+							}
+							it3 = visitats.find(pdSeguent.pos);
+							if((*it3).second == false){
+						                                if(  (cell(pdSeguent.pos).type != Wall)  /*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
+						                                   	// cout << "Ha carregat la cela" << pdSeguent.pos  << "Amb direccio: " << pdSeguent.dir << endl;
+						                                    Q.push(pdSeguent);
 									(*it3).second = true;
 								}
 							}
@@ -161,14 +205,11 @@ struct PLAYER_NAME : public Player {
 						primer = false;
 
 					}
-
-
-
  				}
  			}
  		}
-		cout <<"What da hell is happening" << endl;
-		return Right;
+	//cout <<"What da hell is happening" << endl;
+       	 return None;
 	}
   /**
    * Play method, invoked once per each round.
@@ -178,105 +219,67 @@ struct PLAYER_NAME : public Player {
 		VE k = knights(0);
 		VE w = witches(0);
 
-		vector< vector<int> > cell_segura(38, vector<int>(38, true));
-		vector< vector<int> > mov_seg(38, vector<int>(38, true));
-		vector< vector<int> > obj_fin(38, vector<int>(38, true));
+	        	vector< vector<BT> > cell_segura(37, vector<BT>(37));
+	       	 vector<vector<bool> > proper_moviment(37, vector<bool>(37, true)); //true es pot fer moviment, false, ocupat
 
-		/*
-		for(int m = 1; m < 38; ++m){
-			for(int n = 1; n < 38; ++n){
-				cout << "Valor de m: " << m << "Valor de n: " << n << endl;
+		for(int m = 1; m < 36; ++m){
+			for(int n = 1; n < 36; ++n){
 				Cell c = cell(m,n);
-				Unit u = unit(c.id);
-				int i = (u.pos).i;
-				int j = (u.pos).j;
-				if(cell_segura[m][n] and unit(c.id).player != 0 and unit(c.id).type == 1){
-				  if(pos_valida( i+1,j ) ) cell_segura[i+1][j] = false;
-				  else if(pos_valida(i -1,j ) )cell_segura[i-1][j]= false ;
-				  else if(pos_valida(i ,j +1) )cell_segura[i][j+1] = false;
-				  else if(pos_valida(i ,j -1) )cell_segura[i][j-1]= false;
-				  else if(pos_valida(i +1,j +1) )cell_segura[i+1][j+1]= false;
-				  else if(pos_valida(i -1,j -1) )cell_segura[i-1][j-1]= false ;
-				  else if(pos_valida(i +1,j -1) )cell_segura[i+1][j-1]= false;
-				  else if(pos_valida(i -1,j +1) )cell_segura[i-1][j+1]= false ;
+				if(c.type != Wall){
+					if(c.id != -1){
+				                	Unit u = unit(c.id);
+					            int i = (u.pos).i;
+					            int j = (u.pos).j;
+					            if((unit(c.id).player != 0) and (unit(c.id).type == 1)){
+					            	cell_segura[i][j].b = false;
+							cell_segura[i][j].ut = Knight;
+					                	for(int k = 0; k< 8; ++k){
+					                            	Pos p(m,n);
+					                            	p += vdir[k];
+						                        if(cell(p).type != Wall) {
+							                        cell_segura[p.i][p.j].b = false;
+							                        cell_segura[p.i][p.j].ut = Knight;
+						                        }
+					                        }
+					            }
+					            else if((cell_segura[m][n].b) and (unit(c.id).type == 2)){
+					                 	cell_segura[i][j].b = false;
+							cell_segura[i][j].ut = Witch;
+					            }
+				                }
+				                else if (c.haunted){
+				                	cell_segura[m][n].b = false;
+						cell_segura[m][n].ut = Witch;
+				                    	for(int l = 0; l<8 ; l+=2){
+				                      		Pos pt(m,n);
+				                      		pt += vdir[l];
+					                       	if(cell(pt).type != Wall ) {
+						                	cell_segura[pt.i][pt.j].b = false;
+						                        cell_segura[pt.i][pt.j].ut = Witch;
+						            }
+				                    	}
+				            }
 				}
-				else if (cell_segura[m][n] and unit(c.id).player != 0 and unit(c.id).type == 2){
-				  if(pos_valida( i+1,j ) ) cell_segura[i+1][j]= false;
-				  else if(pos_valida(i -1,j ) )cell_segura[i-1][j]= false ;
-				  else if(pos_valida(i ,j +1) )cell_segura[i][j+1] = false;
-				  else if(pos_valida(i ,j -1) )cell_segura[i][j-1]= false;
-				  else if(pos_valida(i +1,j +1) )cell_segura[i+1][j+1]= false;
-				  else if(pos_valida(i -1,j -1) )cell_segura[i-1][j-1]= false ;
-				  else if(pos_valida(i +1,j -1) )cell_segura[i+1][j-1]= false;
-				  else if(pos_valida(i -1,j +1) )cell_segura[i-1][j+1] = false;
-				  else if(pos_valida( i+2,j ) ) cell_segura[i+2][j]= false;
-				  else if(pos_valida(i -2,j ) )cell_segura[i-2][j] = false;
-				  else if(pos_valida(i ,j +2) )cell_segura[i][j+2]= false ;
-				  else if(pos_valida(i ,j -2) )cell_segura[i][j-2] = false;
-				}
-			}
+				else cell_segura[m][n].b = false;
+			 }
 		}
-		*/
-		
-		/*
-		cout << "Ronda num: " << round()<< endl;
-		int id = 14; 
-		command(id ,bfs(id)); 
-		*/
-		/*
+                
 		for (unsigned int i = 0 ; i <  f.size(); ++i) {
-			 cout << "Posicions: " << unit(f[i]).pos<< endl;
-		}
-		*/
-		
-		for (unsigned int i = 0 ; i <  f.size(); ++i) {
-			 cout << "Ronda num: " << round()<< endl;
-			command(f[i] ,bfs(f[i], cell_segura)); 
+			command(f[i] ,bfs(f[i], cell_segura, proper_moviment)); 
 		}
 		
-		
-		
-		cout << "Ronda num: " << round()<< endl;
 		for (unsigned int j= 0 ; j < k.size(); ++j) {
-			command(k[j], bfs(k[j],cell_segura));
+			command(k[j], bfs(k[j],cell_segura, proper_moviment));
 		} 
-		
-		
-		
-		/*
-		
-		if (round() < 40) command(w[0], Right);
-		    else if (round() < 80) command(w[0], Bottom);
-		    else if (round() < 120) command(w[0], Top);
-		    else if (round() < 160) command(w[0], Bottom);
-		    else {
-		      set<Pos> s;
-		      while ((int)s.size() < 4) s.insert(Pos(random(0, 36), random(0, 36)));
-		      vector<Pos> v(s.begin(), s.end());
-		      if (v[random(0, 3)].i < 18) command(w[0], None);
-		      else command(w[0], Top);
-		    }
-		if (round() < 40) command(w[1], Bottom);
-		    else if (round() < 80) command(w[1], Right);
-		    else if (round() < 120) command(w[1], Left);
-		    else if (round() < 160) command(w[1], Right);
-		    else {
-		      set<Pos> s;
-		      while ((int)s.size() < 4) s.insert(Pos(random(0, 36), random(0, 36)));
-		      vector<Pos> v(s.begin(), s.end());
-		      if (v[random(0, 3)].i < 18) command(w[1], None);
-		      else command(w[1], Top);
-    		}
-		*/
-    		
-		
-		
 
+		command(w[0], bfs(w[0],cell_segura, proper_moviment));
+
+		command(w[1], bfs(w[1],cell_segura, proper_moviment));
   	}
 };
-
 
 /**
  * Do not modify the following line.
  */
 RegisterPlayer(PLAYER_NAME);
+           
