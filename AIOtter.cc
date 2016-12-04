@@ -40,8 +40,8 @@ struct PLAYER_NAME : public Player {
 					            		cell_segura[i][j].b = false;
 							cell_segura[i][j].ut = Knight;
 					                	for(int k = 0; k< 8; ++k){
-					                            		Pos p(m,n);
-					                            		p += vdir[k];
+					                            	Pos p(m,n);
+					                            	p += vdir[k];
 						                        	if(cell(p).type != Wall) {
 							                	cell_segura[p.i][p.j].b = false;
 							                        	cell_segura[p.i][p.j].ut = Knight;
@@ -53,8 +53,8 @@ struct PLAYER_NAME : public Player {
 					                 	cell_segura[i][j].b = false;
 							cell_segura[i][j].ut = Witch;
 					            	}
-				                }
-				                else if (c.haunted){
+				              }
+				              else if (c.haunted){
 				                	cell_segura[m][n].b = false;
 						cell_segura[m][n].ut = Witch;
 				                    	for(int l = 0; l<8 ; l+=2){
@@ -142,7 +142,7 @@ struct PLAYER_NAME : public Player {
 						               		pdSeguent.posP = pdNew.posP;
 						                }
 							if(not enc[pdSeguent.pos.i][pdSeguent.pos.j] ){
-                               							if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and  (proper_moviment[pdSeguent.posP.i][pdSeguent.posP.j]) ) {
+                               							if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and  (proper_moviment[pdSeguent.posP.i][pdSeguent.posP.j])  ) {
 									Q.push(pdSeguent);
 									enc[pdSeguent.pos.i][pdSeguent.pos.j] = true;
 								}
@@ -196,6 +196,13 @@ struct PLAYER_NAME : public Player {
 		vector<vector<bool> > proper_moviment(37, vector<bool>(37, true)); //true es pot fer moviment, false, ocupat
 
 		emplenar_cell_segura(cell_segura);
+
+		for(int i = 0; i< 37; ++i){
+			for(int j = 0; j< 37; ++j){
+				cout << cell_segura[i][j].b << "  " ;
+			}
+			cout << endl;
+		}
 
 		for (unsigned int i = 0 ; i <  f.size(); ++i) {
 			command(f[i] ,bfs(f[i], cell_segura, proper_moviment)); 

@@ -236,7 +236,7 @@ struct PLAYER_NAME : public Player {
 						                                if(  (cell(pdSeguent.pos).type != Wall and proper_moviment[pdNew.posP.i][pdNew.posP.j])  /*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
 						                                   	// cout << "Ha carregat la cela" << pdSeguent.pos  << "Amb direccio: " << pdSeguent.dir << endl;
 						                                    	Q.push(pdSeguent);
-									enc[pdSeguent.pos.i][pdSeguent.pos.j]  = true;
+									enc[pdSeguent.pos.i][pdSeguent.pos.j] = true;
 								}
 							}
 						}
