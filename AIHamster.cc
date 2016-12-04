@@ -40,12 +40,12 @@ struct PLAYER_NAME : public Player {
 
      	vector<Dir> vdir{Top,RT,Right, BR,Bottom,LB,Left, TL};
 
-	Dir calcular_seg_dir(int d){
+	inline Dir calcular_seg_dir(int d){
 		int enu = (d+2)%8  ;
 		return Dir(enu);
 	}
 
-	Dir calcular_seg_dir_modul8(int d){
+	inline Dir calcular_seg_dir_modul8(int d){
 		int enu = (d+1)%8  ;
 		return Dir(enu);
 	}
@@ -132,14 +132,9 @@ struct PLAYER_NAME : public Player {
 					if(unitat.type == Farmer){
 						
 						if(pdNew.pos != pd.pos and not primer){
-							//cout << "Dins" << endl;
-							//cout << "Actualitzacio valor. Pos:  " << pdNew.pos << "  Dir:  " << pdNew.dir << " Ini: "<<  pdNew.ini<<endl;
 							Cell cela = cell(pdNew.pos);
-							//cout << "Comprovacio   valor cela:    "  << cela.haunted << " Cela id:   " <<  cela.id<<endl;
-							//cout << "Valor de pdNew.dir:  " << pdNew.dir << endl;
+							
 	                           					if(cela.owner != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
-	                               		 			//cout << "Comanda a executa. Pos:  " << pdNew.pos << "   dir:   " << pdNew.dir<< "  Ini:  " << pdNew.ini << endl;
-									cout << endl;
 	                                 					proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
 									return pdNew.ini;
 								}
@@ -209,7 +204,6 @@ struct PLAYER_NAME : public Player {
 							it3 = visitats.find(pdSeguent.pos);
 							if((*it3).second == false){
 									bool capdins = false;
-									
 						                               if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted )/*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
 						                                   	// cout << "Ha carregat la cela" << pdSeguent.pos  << "Amb direccio: " << pdSeguent.dir << endl;
 						                                    	Q.push(pdSeguent);
@@ -283,16 +277,11 @@ struct PLAYER_NAME : public Player {
 		for (unsigned int i = 0 ; i <  f.size(); ++i) {
 			command(f[i] ,bfs(f[i], cell_segura, proper_moviment)); 
 		}
-		
 		for (unsigned int j= 0 ; j < k.size(); ++j) {
 			command(k[j], bfs(k[j],cell_segura, proper_moviment));
 		} 
-
 		command(w[0], bfs(w[0],cell_segura, proper_moviment));
-
-		command(w[1], bfs(w[1],cell_segura, proper_moviment));
-
-		
+		command(w[1], bfs(w[1],cell_segura, proper_moviment));	
   	}
 };
 
@@ -300,4 +289,3 @@ struct PLAYER_NAME : public Player {
  * Do not modify the following line.
  */
 RegisterPlayer(PLAYER_NAME);
-           

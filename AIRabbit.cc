@@ -40,12 +40,12 @@ struct PLAYER_NAME : public Player {
 
      	vector<Dir> vdir{Top,RT,Right, BR,Bottom,LB,Left, TL};
 
-	Dir calcular_seg_dir(int d){
+	inline Dir calcular_seg_dir(int d){
 		int enu = (d+2)%8  ;
 		return Dir(enu);
 	}
 
-	Dir calcular_seg_dir_modul8(int d){
+	inline Dir calcular_seg_dir_modul8(int d){
 		int enu = (d+1)%8  ;
 		return Dir(enu);
 	}
@@ -95,6 +95,7 @@ struct PLAYER_NAME : public Player {
 	}
 
     Dir bfs(int id, vector< vector<BT> > & cell_segura, vector<vector<bool> >& proper_moviment){
+    		vector < vector<bool> > enc (37, vector<bool>(37, false));
 		Unit unitat = unit(id);
 		bool primer = true;
 		queue<Pos_Dir> Q;
@@ -119,29 +120,22 @@ struct PLAYER_NAME : public Player {
  			visitats[pd.pos] = false;
  		}
  		it = visitats.find(pd.pos);
- 		if( (*it).second == false ){
 
 
+ 		if( not enc[pd.pos.i][pd.pos.j] ){
  			if ((cell(pd.pos)).type != Wall  ){
  				Q.push(pd);
- 				(*it).second = true;
+ 				enc[pd.pos.i][pd.pos.j] = true;
  				while(not Q.empty()){
  					Pos_Dir pdNew;
 					pdNew = Q.front(); 
 					Q.pop();
 					if(unitat.type == Farmer){
-						
 						if(pdNew.pos != pd.pos and not primer){
-							//cout << "Dins" << endl;
-							//cout << "Actualitzacio valor. Pos:  " << pdNew.pos << "  Dir:  " << pdNew.dir << " Ini: "<<  pdNew.ini<<endl;
 							Cell cela = cell(pdNew.pos);
-							//cout << "Comprovacio   valor cela:    "  << cela.haunted << " Cela id:   " <<  cela.id<<endl;
-							//cout << "Valor de pdNew.dir:  " << pdNew.dir << endl;
 	                           					if(cela.owner != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
-	                               		 			//cout << "Comanda a executa. Pos:  " << pdNew.pos << "   dir:   " << pdNew.dir<< "  Ini:  " << pdNew.ini << endl;
-									cout << endl;
 	                                 					proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
-									return pdNew.ini;
+								return pdNew.ini;
 								}
 						}
 						for( int k = 0; k < 4; ++k){
@@ -161,16 +155,12 @@ struct PLAYER_NAME : public Player {
 						                            }
 							
 							//cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
-							auto it2 = visitats.find(pdSeguent.pos);
-							if(it2 == visitats.end() ){ 
-								visitats[pdSeguent.pos] = false;
-							}
-							it2 = visitats.find(pdSeguent.pos);
-							if((*it2).second == false){
-                               						if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and (  cell(pdSeguent.pos).id == -1)  and cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) {
-									Q.push(pdSeguent);
-									(*it2).second = true;
-								}
+							
+							if(not enc[pdSeguent.pos.i][pdSeguent.pos.j] ){
+	                               						if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and (  cell(pdSeguent.pos).id == -1)  and cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) {
+										Q.push(pdSeguent);
+										enc[pdSeguent.pos.i][pdSeguent.pos.j]  = true;
+									}
 							}
 						}
 						primer = false;
@@ -180,7 +170,7 @@ struct PLAYER_NAME : public Player {
 							Cell cela = cell(pdNew.pos);
 							if(cela.id != -1){
 								Unit u = unit(cela.id);
-	                                						if(u.type != 2 and u.player != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
+	                                					if(u.type != 2 and u.player != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
 	                                     						proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
 	                                    						return pdNew.ini;
 									}
@@ -202,18 +192,14 @@ struct PLAYER_NAME : public Player {
 							                                pdSeguent.posP = pdNew.posP;
 						                          	}
 							//cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
-							auto it3 = visitats.find(pdSeguent.pos);
-							if(it3 == visitats.end() ){ 
-								visitats[pdSeguent.pos] = false;
-							}
-							it3 = visitats.find(pdSeguent.pos);
-							if((*it3).second == false){
+							
+							if(not enc[pdSeguent.pos.i][pdSeguent.pos.j] ){
 									bool capdins = false;
 									if((cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) or  ((not cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) and cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)) capdins = true;
 						                               if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted )and capdins/*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
 						                                   	// cout << "Ha carregat la cela" << pdSeguent.pos  << "Amb direccio: " << pdSeguent.dir << endl;
 						                                    	Q.push(pdSeguent);
-									(*it3).second = true;
+									enc[pdSeguent.pos.i][pdSeguent.pos.j] = true;
 								}
 							}
 						}
@@ -224,7 +210,7 @@ struct PLAYER_NAME : public Player {
 							Cell cela = cell(pdNew.pos);
 							if(cela.id != -1){
 								Unit u = unit(cela.id);
-	                                					if( u.player != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
+	                                					if(u.type != 2  and  u.player != 0 and proper_moviment[pdNew.posP.i][pdNew.posP.j]){
 	                                     						proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
 	                                    						return pdNew.ini;
 									}
@@ -246,16 +232,11 @@ struct PLAYER_NAME : public Player {
 							                                pdSeguent.posP = pdNew.posP;
 						                          	}
 							//cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
-							auto it3 = visitats.find(pdSeguent.pos);
-							if(it3 == visitats.end() ){ 
-								visitats[pdSeguent.pos] = false;
-							}
-							it3 = visitats.find(pdSeguent.pos);
-							if((*it3).second == false){
+							if(not enc[pdSeguent.pos.i][pdSeguent.pos.j] ){
 						                                if(  (cell(pdSeguent.pos).type != Wall and proper_moviment[pdNew.posP.i][pdNew.posP.j])  /*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
 						                                   	// cout << "Ha carregat la cela" << pdSeguent.pos  << "Amb direccio: " << pdSeguent.dir << endl;
 						                                    	Q.push(pdSeguent);
-										(*it3).second = true;
+									enc[pdSeguent.pos.i][pdSeguent.pos.j]  = true;
 								}
 							}
 						}
