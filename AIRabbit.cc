@@ -3,28 +3,16 @@
 #include <map>
 #include <math.h>
 
-/**
- * Write the name of your player and save this file
- * with the same name and .cc extension.
- */
 #define PLAYER_NAME Rabbit
-
 
 struct PLAYER_NAME : public Player {
 
-  /**
-   * Factory: returns a new instance of this class.
-   * Do not modify this function.
-   */
    static Player* factory () {
     return new PLAYER_NAME;
   }
 
-  /**
-   * Types and attributes for your player can be defined here.
-   */
 	typedef vector<int> VE;
-	typedef vector< vector<int>> MAT;
+
 	struct Pos_Dir {
 		Pos pos;
         		Pos posP;
@@ -65,7 +53,7 @@ struct PLAYER_NAME : public Player {
 					                	for(int k = 0; k< 8; ++k){
 					                            	Pos p(m,n);
 					                            	p += vdir[k];
-						                        if(cell(p).type != Wall) {
+						                        	if(cell(p).type != Wall) {
 							                        cell_segura[p.i][p.j].b = false;
 							                        cell_segura[p.i][p.j].ut = Knight;
 						                        }
@@ -157,7 +145,7 @@ struct PLAYER_NAME : public Player {
 							//cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
 							
 							if(not enc[pdSeguent.pos.i][pdSeguent.pos.j] ){
-	                               						if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and (  cell(pdSeguent.pos).id == -1)  and cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) {
+	                               						if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and ( cell(pdSeguent.pos).id == -1)  and (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) ) {
 										Q.push(pdSeguent);
 										enc[pdSeguent.pos.i][pdSeguent.pos.j]  = true;
 									}
@@ -197,8 +185,7 @@ struct PLAYER_NAME : public Player {
 									bool capdins = false;
 									if((cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) or  ((not cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b) and cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)) capdins = true;
 						                               if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted )and capdins/*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
-						                                   	// cout << "Ha carregat la cela" << pdSeguent.pos  << "Amb direccio: " << pdSeguent.dir << endl;
-						                                    	Q.push(pdSeguent);
+						                                   	Q.push(pdSeguent);
 									enc[pdSeguent.pos.i][pdSeguent.pos.j] = true;
 								}
 							}
@@ -231,10 +218,8 @@ struct PLAYER_NAME : public Player {
 							                                pdSeguent.ini = pdNew.ini;
 							                                pdSeguent.posP = pdNew.posP;
 						                          	}
-							//cout << "Valor de pdSeguent:  " <<pdSeguent.pos <<"   " <<pdSeguent.dir<<  "   Ini:   " << pdSeguent.ini << endl;
 							if(not enc[pdSeguent.pos.i][pdSeguent.pos.j] ){
-						                                if(  (cell(pdSeguent.pos).type != Wall and proper_moviment[pdNew.posP.i][pdNew.posP.j])  /*and  (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b and  cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].ut != Witch)*/ ) {
-						                                   	// cout << "Ha carregat la cela" << pdSeguent.pos  << "Amb direccio: " << pdSeguent.dir << endl;
+						                                if(  (cell(pdSeguent.pos).type != Wall and proper_moviment[pdNew.posP.i][pdNew.posP.j])   ) {
 						                                    	Q.push(pdSeguent);
 									enc[pdSeguent.pos.i][pdSeguent.pos.j] = true;
 								}
@@ -245,7 +230,6 @@ struct PLAYER_NAME : public Player {
  				}
  			}
  		}
-	//cout <<"What da hell is happening" << endl;
        	 return None;
 	}
   /**

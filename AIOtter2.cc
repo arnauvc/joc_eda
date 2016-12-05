@@ -3,7 +3,7 @@
 #include <map>
 #include <math.h>
 
-#define PLAYER_NAME Otter
+#define PLAYER_NAME Otter2
 
 struct PLAYER_NAME : public Player {
 
@@ -77,27 +77,71 @@ struct PLAYER_NAME : public Player {
 		queue<Pos_Dir> Q;
 		vector < vector<bool> > enc (37, vector<bool>(37, false));
 		int ran = 2*random(0,3);
+		int cell_sense_id = 0;
 		Pos_Dir pd;
 		pd.pos = unit(id).pos;
 		pd.dir = None;
 		pd.ini = None;
- 		if( not enc[pd.pos.i][pd.pos.j] ){
- 			if ((cell(pd.pos)).type != Wall  ){
- 				Q.push(pd);
- 				enc[pd.pos.i][pd.pos.j] = true;
- 				while(not Q.empty()){
- 					Pos_Dir pdNew = Q.front(); 
-					Q.pop();
-					if(unit(id).type == Farmer){
-						if(pdNew.dir != None){
-							Cell cela = cell(pdNew.pos);
-	                           					if(cela.owner != 0  /* and  proper_moviment[pdNew.pos.i][pdNew.pos.j] */){   
+ 		Q.push(pd);
+ 		enc[pd.pos.i][pd.pos.j] = true;
+ 		while(not Q.empty()){
+ 			Pos_Dir pdNew = Q.front(); 
+			Q.pop();
+			if(unit(id).type == Farmer){
+				if(pdNew.dir != None){
+					Cell cela = cell(pdNew.pos);
+	                           			if(cela.owner != 0   and  proper_moviment[pdNew.posP.i][pdNew.posP.j] ){   
+	                         				proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
+						return pdNew.ini;
+					}
+				}
+				for( int k = 0; k < 4; ++k){
+					ran = (2+ran)%8;
+					Pos_Dir pdSeguent;
+					pdSeguent.pos = pdNew.pos+ vdir[ran];
+					pdSeguent.dir = vdir[ran]; 
+				              if(pdNew.dir == None) {
+				                	pdSeguent.ini = pdSeguent.dir;
+				                	pdSeguent.posP = pdSeguent.pos;
+				              }
+				              else {
+				              	pdSeguent.ini = pdNew.ini;
+				              	pdSeguent.posP = pdNew.posP;
+				              }
+					if(not enc[pdSeguent.pos.i][pdSeguent.pos.j] ){
+                               				if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and (cell(pdSeguent.pos).id == -1) and  (cell_segura[pdSeguent.posP.i][pdSeguent.posP.j].b)) {
+							Q.push(pdSeguent);
+							enc[pdSeguent.pos.i][pdSeguent.pos.j] = true;
+						}
+					}
+				}
+			}
+			else if(unit(id).type == Knight){
+				if(pdNew.dir != None){
+					Cell cela = cell(pdNew.pos);
+	                           			if(cela.id != -1  ){
+	                           				Unit u = unit(cela.id);
+	                           				if(u.type != 2 and u.player != 0  and  proper_moviment[pdNew.posP.i][pdNew.posP.j] ){
 	                           						proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
-								return pdNew.ini;
+
+									return pdNew.ini;
+	                           						}  
+	                           						else if ( u.player == 0  and u.type != 2){
+									if ((unit(id)).health <= 90){
+										++cell_sense_id;
+										if (cell_sense_id >= 7) return None;
+									}	
+								}	
+							}
+							else {
+								if ((unit(id)).health <= 90){
+									++cell_sense_id;
+									if (cell_sense_id >= 7) return None;
+								}
 							}
 						}
-						for( int k = 0; k < 4; ++k){
-							ran = (2+ran)%8;
+						for( int k = 0; k < 8; ++k){
+							ran = (1+ran)%8;
 							Pos_Dir pdSeguent;
 							pdSeguent.pos = pdNew.pos+ vdir[ran];
 							pdSeguent.dir = vdir[ran]; 
@@ -106,43 +150,11 @@ struct PLAYER_NAME : public Player {
 						                	pdSeguent.posP = pdSeguent.pos;
 						              }
 						              else {
-						              	pdSeguent.ini = pdNew.ini;
+						             		pdSeguent.ini = pdNew.ini;
 						              	pdSeguent.posP = pdNew.posP;
 						              }
 							if(not enc[pdSeguent.pos.i][pdSeguent.pos.j] ){
-                               							if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and (cell(pdSeguent.pos).id == -1) and  (proper_moviment[pdSeguent.posP.i][pdSeguent.posP.j]) and (cell_segura[pdSeguent.pos.i][pdSeguent.pos.j].b)) {
-									Q.push(pdSeguent);
-									enc[pdSeguent.pos.i][pdSeguent.pos.j] = true;
-								}
-							}
-						}
-					}
-					else if(unit(id).type == Knight){
-						if(pdNew.dir != None){
-							Cell cela = cell(pdNew.pos);
-	                           					if(cela.id != -1  ){
-	                           						Unit u = unit(cela.id);
-	                           						if(u.type != 2 and u.player != 0 ){
-	                           							proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
-									return pdNew.ini;
-	                           						}   	
-							}
-						}
-						for( int k = 0; k < 8; ++k){
-							ran = (1+ran)%8;
-							Pos_Dir pdSeguent;
-							pdSeguent.pos = pdNew.pos+ vdir[ran];
-							pdSeguent.dir = vdir[ran]; 
-						                if(pdNew.dir == None) {
-						                	pdSeguent.ini = pdSeguent.dir;
-						                	pdSeguent.posP = pdSeguent.pos;
-						                }
-						                else {
-						                	pdSeguent.ini = pdNew.ini;
-						               		pdSeguent.posP = pdNew.posP;
-						                }
-							if(not enc[pdSeguent.pos.i][pdSeguent.pos.j] ){
-                               							if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted ) and  (proper_moviment[pdSeguent.posP.i][pdSeguent.posP.j])  ) {
+                               						if(  (cell(pdSeguent.pos).type != Wall) and (not cell(pdSeguent.pos).haunted )   and ( (cell_segura[pdSeguent.posP.i][pdSeguent.posP.j].b) or  ((not cell_segura[pdSeguent.posP.i][pdSeguent.posP.j].b) and cell_segura[pdSeguent.posP.i][pdSeguent.posP.j].ut != Witch))  ) {
 									Q.push(pdSeguent);
 									enc[pdSeguent.pos.i][pdSeguent.pos.j] = true;
 								}
@@ -154,7 +166,7 @@ struct PLAYER_NAME : public Player {
 							Cell cela = cell(pdNew.pos);
 	                           					if(cela.id != -1  ){
 	                           						Unit u = unit(cela.id);
-	                           						if(u.type != 2 and u.player != 0 ){
+	                           						if(u.type != 2 and u.player != 0  and  proper_moviment[pdNew.posP.i][pdNew.posP.j]){
 	                           							proper_moviment[pdNew.posP.i][pdNew.posP.j] = false;
 									return pdNew.ini;
 	                           						}   	
@@ -174,7 +186,7 @@ struct PLAYER_NAME : public Player {
 						               	pdSeguent.posP = pdNew.posP;
 						              }
 							if(not enc[pdSeguent.pos.i][pdSeguent.pos.j] ){
-                               							if( cell(pdSeguent.pos).type != Wall  and  proper_moviment[pdSeguent.posP.i][pdSeguent.posP.j]) {
+                               							if( cell(pdSeguent.pos).type != Wall  /*and proper_moviment[pdNew.posP.i][pdNew.posP.j] */) {
 									Q.push(pdSeguent);
 									enc[pdSeguent.pos.i][pdSeguent.pos.j] = true;
 								}
@@ -182,8 +194,7 @@ struct PLAYER_NAME : public Player {
 						}
 					}
  				}
- 			}
- 		}
+
        	 return None;
 	}
 
@@ -197,19 +208,13 @@ struct PLAYER_NAME : public Player {
 
 		emplenar_cell_segura(cell_segura);
 
-		for(int i = 0; i< 37; ++i){
-			for(int j = 0; j< 37; ++j){
-				cout << cell_segura[i][j].b << "  " ;
-			}
-			cout << endl;
-		}
-
 		for (unsigned int i = 0 ; i <  f.size(); ++i) {
 			command(f[i] ,bfs(f[i], cell_segura, proper_moviment)); 
 		}
 		for (unsigned int j= 0 ; j < k.size(); ++j) {
 			command(k[j], bfs(k[j], cell_segura, proper_moviment));
 		} 
+
 		command(w[0], bfs(w[0], cell_segura, proper_moviment));
 		command(w[1], bfs(w[1],cell_segura, proper_moviment));
 	}
